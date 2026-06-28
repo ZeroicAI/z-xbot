@@ -1,4 +1,4 @@
-﻿# AgentropicAI Twitter Bot 
+﻿# ZeroicAIAI Twitter Bot 
 
 Autonomous Twitter bot posting bull content about AI, agents, crypto, and meme coins.
 
@@ -7,7 +7,7 @@ Autonomous Twitter bot posting bull content about AI, agents, crypto, and meme c
 -  **Automated Posting** - 4 tweets per day (every 6 hours)
 -  **5 Content Categories**:
   - AI & Machine Learning
-  - Agentropic Framework
+  - ZeroicAI Framework
   - Crypto & DeFi
   - Meme Coins
   - General Bull Posts
@@ -23,9 +23,9 @@ Autonomous Twitter bot posting bull content about AI, agents, crypto, and meme c
 
 ## Account
 
-- **Twitter**: [@AgentropicAI](https://twitter.com/AgentropicAI)
+- **Twitter**: [@ZeroicAIAI](https://twitter.com/ZeroicAIAI)
 - **Status**: Fully automated bot
-- **Managed by**: Agentropic Team
+- **Managed by**: ZeroicAI Team
 
 ## License
 
@@ -33,4 +33,4 @@ MIT
 
 ---
 
-*Built with Rust 🦀 | Powered by Agentropic*
+*Built with Rust 🦀 | Powered by ZeroicAI*
