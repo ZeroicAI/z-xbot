@@ -6,8 +6,8 @@ authors = ["ZeroicAI <devzeroicai@gmail.com>"]
 
 [dependencies]
 # ZeroicAI framework
-z-core = { git = "https://github.com/zeroicai/z-core", branch = "main" }
-z-cognition = { git = "https://github.com/zeroicai/z-cognition", branch = "main" }
+z-core = { git = "https://github.com/ZeroicAI/z-core", branch = "main" }
+z-cognition = { git = "https://github.com/ZeroicAI/z-cognition", branch = "main" }
 
 # Twitter API v2 with manual OAuth 1.0a
 reqwest = { version = "0.11", features = ["json"] }
