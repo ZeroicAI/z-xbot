@@ -1,4 +1,4 @@
-use agentropic_cognition::{Belief, BeliefBase, ReasoningEngine, Rule, UtilityFunction};
+use z_cognition::{Belief, BeliefBase, ReasoningEngine, Rule, UtilityFunction};
 use tracing::{info, debug};
 
 /// Build the reasoning engine with topic-matching rules
@@ -127,13 +127,13 @@ pub fn build_reasoning_engine() -> ReasoningEngine {
             .with_conclusion("topic:examples"),
     );
 
-    // What is Agentropic (broad catch-all)
+    // What is ZeroicAI (broad catch-all)
     engine.add_rule(
         Rule::new("topic:what_is")
             .with_condition("what")
             .with_condition("who")
             .with_condition("about")
-            .with_condition("agentropic")
+            .with_condition("zeroicai")
             .with_condition("explain")
             .with_condition("tell")
             .with_conclusion("topic:what_is"),
@@ -159,12 +159,12 @@ fn extract_facts(text: &str) -> Vec<String> {
 fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
     match topic {
         "topic:what_is" => vec![
-            format!("{}\n\nLearn more: https://agentropic.com", lookup(beliefs, "what_is_agentropic")),
-            format!("{} {}", lookup(beliefs, "what_is_agentropic"), lookup(beliefs, "modular")),
+            format!("{}\n\nLearn more: https://zeroicai.org", lookup(beliefs, "what_is_zeroicai")),
+            format!("{} {}", lookup(beliefs, "what_is_zeroicai"), lookup(beliefs, "modular")),
         ],
         "topic:patterns" => vec![
             lookup(beliefs, "patterns"),
-            format!("{}\n\nExplore: https://github.com/agentropic/agentropic-examples", lookup(beliefs, "patterns")),
+            format!("{}\n\nExplore: https://github.com/zeroicai/z-examples", lookup(beliefs, "patterns")),
         ],
         "topic:messaging" => vec![
             lookup(beliefs, "messaging"),
@@ -192,7 +192,7 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
         ],
         "topic:getting_started" => vec![
             format!("{}\n\n{}\n\n{}", lookup(beliefs, "install"), lookup(beliefs, "examples"), lookup(beliefs, "docs")),
-            format!("{}\n\nCheck out our examples: https://github.com/agentropic/agentropic-examples", lookup(beliefs, "install")),
+            format!("{}\n\nCheck out our examples: https://github.com/zeroicai/z-examples", lookup(beliefs, "install")),
         ],
         "topic:why_rust" => vec![
             lookup(beliefs, "why_rust"),
@@ -203,8 +203,8 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
             format!("{}\n\nCovers all 5 crates end-to-end.", lookup(beliefs, "examples")),
         ],
         _ => vec![
-            format!("{}\n\nAsk me about patterns, messaging, cognition, runtime, or getting started!", lookup(beliefs, "what_is_agentropic")),
-            "I'm Agentropic — a multi-agent framework for Rust! Ask me about our 8 patterns, BDI cognition, message routing, or how to get started.\n\nhttps://agentropic.com".to_string(),
+            format!("{}\n\nAsk me about patterns, messaging, cognition, runtime, or getting started!", lookup(beliefs, "what_is_zeroicai")),
+            "I'm ZeroicAI — a multi-agent framework for Rust! Ask me about our 8 patterns, BDI cognition, message routing, or how to get started.\n\nhttps://zeroicai.org".to_string(),
         ],
     }
 }
@@ -212,7 +212,7 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
 /// Look up a belief value, with fallback
 fn lookup(beliefs: &BeliefBase, key: &str) -> String {
     let key_owned = key.to_string();
-    let results = beliefs.query(move |b: &agentropic_cognition::Belief| b.key() == key_owned);
+    let results = beliefs.query(move |b: &z_cognition::Belief| b.key() == key_owned);
     results
         .first()
         .map(|b| b.value().to_string())
@@ -333,7 +333,7 @@ mod tests {
 
     #[test]
     fn test_extract_facts() {
-        let facts = extract_facts("@agentropic what patterns do you support?");
+        let facts = extract_facts("@zeroicai what patterns do you support?");
         assert!(facts.contains(&"patterns".to_string()));
         assert!(facts.contains(&"support".to_string()));
         assert!(!facts.iter().any(|f| f.starts_with('@')));
@@ -342,7 +342,7 @@ mod tests {
     #[test]
     fn test_engine_matches_patterns() {
         let (beliefs, engine) = setup();
-        let response = generate_response("@agentropic what patterns do you support?", &beliefs, &engine);
+        let response = generate_response("@zeroicai what patterns do you support?", &beliefs, &engine);
         assert!(response.is_some());
         let text = response.unwrap();
         assert!(text.len() <= 280);
@@ -352,7 +352,7 @@ mod tests {
     #[test]
     fn test_engine_matches_bdi() {
         let (beliefs, engine) = setup();
-        let response = generate_response("@agentropic explain BDI belief desire intention", &beliefs, &engine);
+        let response = generate_response("@zeroicai explain BDI belief desire intention", &beliefs, &engine);
         assert!(response.is_some());
         let text = response.unwrap();
         assert!(text.len() <= 280);
@@ -362,7 +362,7 @@ mod tests {
     #[test]
     fn test_engine_matches_swarm() {
         let (beliefs, engine) = setup();
-        let response = generate_response("@agentropic how does the swarm work?", &beliefs, &engine);
+        let response = generate_response("@zeroicai how does the swarm work?", &beliefs, &engine);
         assert!(response.is_some());
         let text = response.unwrap();
         assert!(text.len() <= 280);
@@ -371,7 +371,7 @@ mod tests {
     #[test]
     fn test_unknown_gives_default() {
         let (beliefs, engine) = setup();
-        let response = generate_response("@agentropic xyzzy blorp", &beliefs, &engine);
+        let response = generate_response("@zeroicai xyzzy blorp", &beliefs, &engine);
         assert!(response.is_some());
         assert!(response.unwrap().len() <= 280);
     }
@@ -380,18 +380,18 @@ mod tests {
     fn test_all_topics_produce_responses() {
         let (beliefs, engine) = setup();
         let queries = vec![
-            "@agentropic what is agentropic?",
-            "@agentropic what patterns?",
-            "@agentropic how does messaging work?",
-            "@agentropic tell me about cognition",
-            "@agentropic what about BDI?",
-            "@agentropic auction system?",
-            "@agentropic swarm behavior?",
-            "@agentropic runtime supervisor?",
-            "@agentropic how to get started?",
-            "@agentropic why Rust?",
-            "@agentropic show examples",
-            "@agentropic random gibberish xyz",
+            "@zeroicai what is zeroicai?",
+            "@zeroicai what patterns?",
+            "@zeroicai how does messaging work?",
+            "@zeroicai tell me about cognition",
+            "@zeroicai what about BDI?",
+            "@zeroicai auction system?",
+            "@zeroicai swarm behavior?",
+            "@zeroicai runtime supervisor?",
+            "@zeroicai how to get started?",
+            "@zeroicai why Rust?",
+            "@zeroicai show examples",
+            "@zeroicai random gibberish xyz",
         ];
 
         for query in queries {
