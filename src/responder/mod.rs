@@ -1,4 +1,4 @@
-use z_cognition::{Belief, BeliefBase, ReasoningEngine, Rule, UtilityFunction};
+use z_cognition::{BeliefBase, ReasoningEngine, Rule, UtilityFunction};
 use tracing::{info, debug};
 
 /// Build the reasoning engine with topic-matching rules
