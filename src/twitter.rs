@@ -53,6 +53,7 @@ pub struct MentionData {
 #[derive(Deserialize, Debug)]
 pub struct MentionsMeta {
     pub newest_id: Option<String>,
+    #[allow(dead_code)]
     pub result_count: u64,
 }
 
