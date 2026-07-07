@@ -172,7 +172,7 @@ fn extract_facts(text: &str) -> Vec<String> {
 fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
     match topic {
         "topic:what_is" => vec![
-            format!("{}\n\nLearn more: https://zeroicai.org", lookup(beliefs, "what_is_zeroicai")),
+            format!("{}\n\nLearn more: https://zeroicai.xyz", lookup(beliefs, "what_is_zeroicai")),
             format!("{} {}", lookup(beliefs, "what_is_zeroicai"), lookup(beliefs, "modular")),
         ],
         "topic:patterns" => vec![
@@ -222,7 +222,7 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
         ],
         _ => vec![
             format!("{}\n\nAsk me about patterns, messaging, cognition, runtime, or getting started!", lookup(beliefs, "what_is_zeroicai")),
-            "I'm ZeroicAI — a multi-agent framework for Rust! Ask me about our 8 patterns, BDI cognition, message routing, or how to get started.\n\nhttps://zeroicai.org".to_string(),
+            "I'm ZeroicAI — a multi-agent framework for Rust! Ask me about our 8 patterns, BDI cognition, message routing, or how to get started.\n\nhttps://zeroicai.xyz".to_string(),
         ],
     }
 }
