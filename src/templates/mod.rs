@@ -10,10 +10,13 @@ impl TweetTemplates {
     pub fn ai_templates() -> Vec<&'static str> {
         vec![
             "AI agents are evolving faster than most realize. The future is autonomous systems working together.\n\n#AI #Agents #MachineLearning",
-            "The real revolution isn't chatbots — it's multi-agent systems. Agents coordinating decisions and action. Pure alpha.\n\n#AI #MultiAgent",
+            "The real revolution isn't chatbots — it's multi-agent systems. Agents coordinating decisions and action.\n\n#AI #MultiAgent",
             "Neural networks were just the beginning. Agent swarms are the endgame.\n\n#AI #SwarmIntelligence",
             "AGI won't be one model. It'll be thousands of specialized agents in perfect coordination.\n\n#AGI #Agents",
-            "While everyone's playing with prompts, smart money is building autonomous agent systems.\n\n#AI #Automation",
+            "While everyone's playing with prompts, serious builders are shipping autonomous agent systems.\n\n#AI #Automation",
+            "BDI architecture: agents that hold Beliefs, form Desires, commit to Intentions. Not a chatbot. A mind.\n\n#AI #Agents #BDI",
+            "The shift from LLM wrappers to true agent systems is the most underrated transition in AI right now.\n\n#AI #Agents",
+            "Autonomous agents don't just respond — they plan, reason, and act. That gap is everything.\n\n#AI #Agents",
         ]
     }
 
@@ -22,42 +25,47 @@ impl TweetTemplates {
         vec![
             "Production-ready multi-agent systems in Rust. BDI architecture, swarm coordination, fault tolerance — batteries included.\n\n#Rust #ZeroicAI",
             "Your agents deserve Rust's safety and performance. No GC pauses. No Python spaghetti. Just speed.\n\n#Rust #ZeroicAI",
-            "8 org patterns for multi-agent systems: Hierarchy, Swarm, Market, Coalition, Team, Holarchy, Federation, Blackboard. All in Rust.\n\n#ZeroicAI",
+            "8 org patterns: Hierarchy, Swarm, Market, Coalition, Team, Holarchy, Federation, Blackboard. All in ZeroicAI.\n\n#ZeroicAI #Rust",
             "FIPA messaging. BDI cognition. Fault-tolerant runtime. Swarm intelligence. All open source.\n\n#Rust #ZeroicAI #Agents",
-            "While others figure out agent basics, ZeroicAI devs are deploying production swarms. Different game.\n\n#ZeroicAI #MultiAgent",
+            "ZeroicAI agents coordinate like a team, reason like individuals, and scale like infrastructure.\n\n#ZeroicAI #MultiAgent",
+            "Most agent frameworks are demos. ZeroicAI is built for production — Rust runtime, typed messaging, supervised recovery.\n\n#ZeroicAI #Rust",
+            "z-cognition. z-messaging. z-patterns. z-runtime. Every layer of multi-agent intelligence, composable.\n\n#ZeroicAI #Rust",
         ]
     }
 
     /// Crypto + AI hybrid posts
     pub fn crypto_ai_templates() -> Vec<&'static str> {
         vec![
-            "Blockchain + AI agents: on-chain coordination, autonomous execution, trustless cooperation. The future of DeFi is agentic.\n\n#DeFi #AIAgents",
-            "Smart contracts are cool. AI agents executing them autonomously? That's next level.\n\n#AI #Blockchain #DeFi",
-            "MEV but it's AI agents competing in milliseconds. That's the meta.\n\n#MEV #AIAgents #Crypto",
+            "Blockchain + AI agents: on-chain coordination, autonomous execution, trustless cooperation. DeFi is going agentic.\n\n#DeFi #AIAgents",
+            "Smart contracts are logic. AI agents are judgment. Combine them and you get autonomous financial systems.\n\n#AI #Blockchain #DeFi",
+            "MEV but it's AI agent swarms competing in microseconds. That's where this is heading.\n\n#MEV #AIAgents #Crypto",
             "Every major protocol will have AI agents soon. The ones sleeping on this will regret it.\n\n#DeFi #AI #Agents",
             "Algo trading → AI trading agents → Agent swarms coordinating trades. We're entering the swarm era.\n\n#Crypto #AIAgents",
+            "Autonomous agents that negotiate, trade, and settle on-chain without human approval. That's not sci-fi anymore.\n\n#DeFi #AI #Solana",
         ]
     }
 
     /// Meme coin + AI posts
     pub fn meme_ai_templates() -> Vec<&'static str> {
         vec![
-            "AI agent tokens are the new meta. Utility + memes = unstoppable force.\n\n#AI #MemeCoins #Crypto",
-            "Imagine: AI agents shitposting their own meme coins into existence. Bullish.\n\n#AIAgents #Memes",
-            "Doge had a dog. We have autonomous agents. Different era, same energy.\n\n#AI #MemeCoins",
+            "AI agent tokens are the new meta. Utility + narrative = unstoppable.\n\n#AI #Crypto",
+            "Doge had a dog. We have autonomous reasoning agents. Different era, same energy.\n\n#AI #Crypto",
             "AI tokens aren't just memes. They're infrastructure for autonomous economies. (Also they're memes.)\n\n#AI #Crypto",
-            "The best performing asset next year will be an AI agent token nobody's heard of yet. Screenshot this.\n\n#Crypto #AI",
+            "The best performing asset next cycle will be an AI agent token nobody's heard of yet. Screenshot this.\n\n#Crypto #AI",
+            "Agents that generate alpha, execute trades, and post their own updates. The loop is closing.\n\n#AI #Crypto #Agents",
         ]
     }
 
     /// General posts
     pub fn general_bull_templates() -> Vec<&'static str> {
         vec![
-            "Agent economies are coming. Agents trading, coordinating value, building wealth. Humans? Optional.\n\n#AI #Agents #Future",
+            "Agent economies are coming. Agents trading, coordinating value, building wealth autonomously.\n\n#AI #Agents #Future",
             "Going from single AI models to multi-agent systems is like going from single-player to MMO. We're going multiplayer.\n\n#AI #Agents",
             "Your next coworker won't be human. It'll be a swarm of specialized AI agents. Get ready.\n\n#AI #FutureOfWork",
             "AI agents don't sleep, don't take breaks, and scale infinitely. The workforce shift is already here.\n\n#AI #Automation",
             "Building AI agents right now is like building websites in 1995. Early. Weird. Massively underpriced.\n\n#AI #Agents #Tech",
+            "Self-healing systems, decentralized AI markets, autonomous governance. All of this runs on agent infrastructure.\n\n#AI #Agents",
+            "The organizations that win the next decade will be the ones that figured out how to deploy agent teams.\n\n#AI #Automation #Future",
         ]
     }
 

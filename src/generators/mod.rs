@@ -30,9 +30,16 @@ impl TweetGenerator {
         }
     }
 
-    /// Add bot signature, but only if the result fits within 280 chars
-    pub fn add_signature(tweet: String, username: &str) -> String {
-        let signature = format!("\n\n-- Auto-posted by {}", username);
+    /// Pick a random agent name for the signature
+    fn agent_name() -> &'static str {
+        let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR"];
+        agents.choose(&mut rand::thread_rng()).unwrap()
+    }
+
+    /// Add agent signature, but only if the result fits within 280 chars
+    pub fn add_signature(tweet: String, _username: &str) -> String {
+        let agent = Self::agent_name();
+        let signature = format!("\n\n↳ Agent {} · zeroicai.xyz", agent);
         let with_sig = format!("{}{}", tweet, signature);
 
         if with_sig.len() <= MAX_TWEET_LENGTH {
