@@ -233,7 +233,7 @@ async fn generate_tweet_with_llm(
         \nContext (use this knowledge, do not invent facts):\n{context}\n\
         \nRules:\n\
         - Maximum 235 characters for the body (a signature will be appended)\n\
-        - 1-2 hashtags max\n\
+        - No hashtags\n\
         - Sound thoughtful, technical, and self-aware as an AI agent\n\
         - Do NOT include URLs unless the topic is about docs or getting started\n\
         - Output ONLY the tweet body text. No quotes, no signature, no extra text.",
