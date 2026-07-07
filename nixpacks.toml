@@ -1,5 +1,8 @@
 [phases.build]
-cmds = ["cargo build --release"]
+cmds = [
+  "cargo build --release --target x86_64-unknown-linux-musl",
+  "mkdir -p /app/bin && cp /app/target/x86_64-unknown-linux-musl/release/zeroic-xbot /app/bin/zeroic-xbot"
+]
 
 [start]
-cmd = "./target/release/zeroic-xbot"
+cmd = "/app/bin/zeroic-xbot"
