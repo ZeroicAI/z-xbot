@@ -140,6 +140,19 @@ pub fn build_reasoning_engine() -> ReasoningEngine {
             .with_conclusion("topic:solana"),
     );
 
+    // Owner / creator
+    engine.add_rule(
+        Rule::new("topic:owner")
+            .with_condition("owner")
+            .with_condition("creator")
+            .with_condition("founder")
+            .with_condition("who")
+            .with_condition("made")
+            .with_condition("built")
+            .with_condition("created")
+            .with_conclusion("topic:owner"),
+    );
+
     // What is ZeroicAI (broad catch-all)
     engine.add_rule(
         Rule::new("topic:what_is")
@@ -214,6 +227,10 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
         "topic:examples" => vec![
             lookup(beliefs, "examples"),
             format!("{}\n\nCovers all 5 crates end-to-end.", lookup(beliefs, "examples")),
+        ],
+        "topic:owner" => vec![
+            lookup(beliefs, "owner"),
+            format!("{}\n\nFollow the project: https://github.com/ZeroicAI", lookup(beliefs, "owner")),
         ],
         "topic:solana" => vec![
             lookup(beliefs, "solana"),
