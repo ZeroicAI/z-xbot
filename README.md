@@ -1,4 +1,4 @@
-﻿# ZeroicAIAI Twitter Bot 
+﻿# ZeroicAI Twitter Bot 
 
 Autonomous Twitter bot posting bull content about AI, agents, crypto, and meme coins.
 
