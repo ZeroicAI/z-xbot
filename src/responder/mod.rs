@@ -127,6 +127,19 @@ pub fn build_reasoning_engine() -> ReasoningEngine {
             .with_conclusion("topic:examples"),
     );
 
+    // Solana
+    engine.add_rule(
+        Rule::new("topic:solana")
+            .with_condition("solana")
+            .with_condition("sol")
+            .with_condition("defi")
+            .with_condition("onchain")
+            .with_condition("blockchain")
+            .with_condition("swap")
+            .with_condition("liquidity")
+            .with_conclusion("topic:solana"),
+    );
+
     // What is ZeroicAI (broad catch-all)
     engine.add_rule(
         Rule::new("topic:what_is")
@@ -201,6 +214,11 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
         "topic:examples" => vec![
             lookup(beliefs, "examples"),
             format!("{}\n\nCovers all 5 crates end-to-end.", lookup(beliefs, "examples")),
+        ],
+        "topic:solana" => vec![
+            lookup(beliefs, "solana"),
+            format!("{}\n\n{}", lookup(beliefs, "solana"), lookup(beliefs, "solana_usecase")),
+            lookup(beliefs, "defi_agents"),
         ],
         _ => vec![
             format!("{}\n\nAsk me about patterns, messaging, cognition, runtime, or getting started!", lookup(beliefs, "what_is_zeroicai")),
