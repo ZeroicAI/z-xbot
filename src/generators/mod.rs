@@ -144,7 +144,7 @@ impl TweetGenerator {
             TweetTopic::OrgPatterns => vec![
                 format!("{}\n\n#ZeroicAI #MultiAgent #Rust", l("patterns")),
                 format!(
-                    "8 ways to organize agents. One framework.\n\n{}\n\nzeroicai.xyz\n\n#ZeroicAI",
+                    "8 ways to organize agents. One framework.\n\n{}\n\n#ZeroicAI",
                     l("patterns")
                 ),
             ],
@@ -228,7 +228,7 @@ impl TweetGenerator {
         let body = Self::pick_best(candidates)?;
 
         let agent = Self::agent_name();
-        let signature = format!("\n\n↳ Agent {} · zeroicai.xyz", agent);
+        let signature = format!("\n\n↳ Agent {}", agent);
         let with_sig = format!("{}{}", body, signature);
 
         if with_sig.len() <= MAX_TWEET_LENGTH {
