@@ -198,10 +198,6 @@ async fn main() -> Result<()> {
         }
     }
 
-    // Post one immediately on startup
-    info!("Posting initial tweet...");
-    post_tweet(&twitter_client, &config, &tracker, &topic_queue, &brain).await?;
-
     scheduler.start().await?;
 
     info!("Bot is now running. Press Ctrl+C to stop.");
