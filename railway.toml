@@ -2,5 +2,5 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "./target/release/zeroic-xbot"
+startCommand = "/app/bin/zeroic-xbot"
 restartPolicyType = "always"
