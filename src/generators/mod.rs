@@ -73,6 +73,58 @@ impl TopicQueue {
     }
 }
 
+impl TweetTopic {
+    pub fn description(&self) -> &'static str {
+        match self {
+            TweetTopic::WhatIsZeroicAI   => "what ZeroicAI is and why it matters",
+            TweetTopic::WhyRust          => "why ZeroicAI is built in Rust",
+            TweetTopic::BDI              => "BDI (Belief-Desire-Intention) cognitive architecture",
+            TweetTopic::Messaging        => "agent messaging and FIPA performatives",
+            TweetTopic::SwarmPattern     => "the swarm coordination pattern",
+            TweetTopic::MarketPattern    => "the market auction pattern for resource allocation",
+            TweetTopic::CoalitionPattern => "the coalition pattern for temporary agent alliances",
+            TweetTopic::RuntimeSupervisor => "the runtime supervisor for agent fault tolerance",
+            TweetTopic::CircuitBreaker   => "circuit breakers preventing cascading failures",
+            TweetTopic::OrgPatterns      => "the 8 organizational patterns for multi-agent systems",
+            TweetTopic::CrateOverview    => "the 5 ZeroicAI crates and what each does",
+            TweetTopic::Solana           => "ZeroicAI's native Solana blockchain integration",
+            TweetTopic::DeFiAgents       => "autonomous DeFi agents on Solana",
+            TweetTopic::GettingStarted   => "how to get started with ZeroicAI",
+            TweetTopic::OpenSource       => "ZeroicAI being open source under MIT/Apache-2.0",
+            TweetTopic::Community        => "the ZeroicAI community on Telegram",
+            TweetTopic::AgentVsScript    => "the difference between a true agent and a script",
+            TweetTopic::MultiAgentShift  => "the industry shift from single models to multi-agent systems",
+            TweetTopic::FaultTolerance   => "self-healing fault tolerance in agent systems",
+            TweetTopic::FipaStandard     => "FIPA — the IEEE standard for agent communication",
+        }
+    }
+
+    pub fn belief_keys(&self) -> &'static [&'static str] {
+        match self {
+            TweetTopic::WhatIsZeroicAI   => &["what_is_zeroicai", "modular"],
+            TweetTopic::WhyRust          => &["why_rust", "design"],
+            TweetTopic::BDI              => &["bdi", "beliefs", "utility"],
+            TweetTopic::Messaging        => &["messaging", "performatives"],
+            TweetTopic::SwarmPattern     => &["swarm"],
+            TweetTopic::MarketPattern    => &["market"],
+            TweetTopic::CoalitionPattern => &["coalition"],
+            TweetTopic::RuntimeSupervisor => &["runtime_crate", "supervisor"],
+            TweetTopic::CircuitBreaker   => &["circuit_breaker", "backoff"],
+            TweetTopic::OrgPatterns      => &["patterns"],
+            TweetTopic::CrateOverview    => &["crates", "modular"],
+            TweetTopic::Solana           => &["solana", "solana_usecase"],
+            TweetTopic::DeFiAgents       => &["defi_agents", "solana"],
+            TweetTopic::GettingStarted   => &["install", "docs", "examples"],
+            TweetTopic::OpenSource       => &["license", "github"],
+            TweetTopic::Community        => &["telegram", "twitter"],
+            TweetTopic::AgentVsScript    => &["bdi", "why_rust"],
+            TweetTopic::MultiAgentShift  => &["patterns", "what_is_zeroicai"],
+            TweetTopic::FaultTolerance   => &["circuit_breaker", "supervisor", "backoff"],
+            TweetTopic::FipaStandard     => &["fipa", "messaging"],
+        }
+    }
+}
+
 pub struct TweetGenerator;
 
 impl TweetGenerator {
