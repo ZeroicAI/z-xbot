@@ -23,7 +23,7 @@ Autonomous Twitter bot posting bull content about AI, agents, crypto, and meme c
 
 ## Account
 
-- **Twitter**: [@ZeroicAIAI](https://twitter.com/ZeroicAIAI)
+- **Twitter**: [@ZeroicAI](https://twitter.com/ZeroicAI)
 - **Status**: Fully automated bot
 - **Managed by**: ZeroicAI Team
 
