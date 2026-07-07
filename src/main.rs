@@ -1,6 +1,5 @@
 mod generators;
 mod filters;
-mod templates;
 mod config;
 mod twitter;
 mod knowledge;
@@ -16,7 +15,7 @@ use chrono::{Utc, NaiveDate};
 
 use z_cognition::{BeliefBase, ReasoningEngine};
 
-use generators::TweetGenerator;
+use generators::{TweetGenerator, TopicQueue};
 use filters::ContentFilter;
 use config::BotConfig;
 use twitter::TwitterClient;
@@ -75,7 +74,7 @@ async fn main() -> Result<()> {
     dotenv().ok();
     tracing_subscriber::fmt::init();
 
-    info!("ZeroicAIAI Bot starting...");
+    info!("ZeroicAI Bot starting...");
 
     let config = BotConfig::from_env()?;
     config.validate()?;
@@ -84,10 +83,6 @@ async fn main() -> Result<()> {
     info!("  Username: {}", config.bot_username);
     info!("  Post Interval: {} hours", config.post_interval_hours);
     info!("  Max Posts/Day: {}", config.max_posts_per_day);
-    info!("  AI Content: {}", config.enable_ai);
-    info!("  ZeroicAI Content: {}", config.enable_zeroicai);
-    info!("  Crypto Content: {}", config.enable_crypto);
-    info!("  Meme Content: {}", config.enable_meme);
     info!("  Replies Enabled: {}", config.enable_replies);
     if config.enable_replies {
         info!("  Mention Poll: every {} seconds", config.mention_poll_seconds);
@@ -96,15 +91,15 @@ async fn main() -> Result<()> {
     let twitter_client = Arc::new(TwitterClient::new()?);
     info!("Twitter client initialized");
 
-    // Build the ZeroicAI brain
     let brain = Arc::new(AgentBrain {
         beliefs: build_knowledge_base(),
         engine: build_reasoning_engine(),
     });
-    info!("Agent brain loaded: knowledge base + reasoning engine");
+    info!("Agent brain loaded: {} beliefs", "knowledge base + reasoning engine");
 
     let tracker = Arc::new(Mutex::new(PostTracker::new(config.max_posts_per_day)));
     let mention_tracker = Arc::new(Mutex::new(MentionTracker::new()));
+    let topic_queue = Arc::new(Mutex::new(TopicQueue::new()));
 
     let scheduler = JobScheduler::new().await?;
 
@@ -115,13 +110,17 @@ async fn main() -> Result<()> {
     let config_clone = config.clone();
     let client_clone = Arc::clone(&twitter_client);
     let tracker_clone = Arc::clone(&tracker);
+    let queue_clone = Arc::clone(&topic_queue);
+    let brain_clone = Arc::clone(&brain);
 
     let tweet_job = Job::new_async(cron_expr.as_str(), move |_uuid, _lock| {
         let config_inner = config_clone.clone();
         let client_inner = Arc::clone(&client_clone);
         let tracker_inner = Arc::clone(&tracker_clone);
+        let queue_inner = Arc::clone(&queue_clone);
+        let brain_inner = Arc::clone(&brain_clone);
         Box::pin(async move {
-            if let Err(e) = post_tweet(&client_inner, &config_inner, &tracker_inner).await {
+            if let Err(e) = post_tweet(&client_inner, &config_inner, &tracker_inner, &queue_inner, &brain_inner).await {
                 error!("Failed to post tweet: {}", e);
             }
         })
@@ -131,7 +130,6 @@ async fn main() -> Result<()> {
 
     // --- Mention reply job ---
     if config.enable_replies {
-        // Resolve user ID
         let user_id = match &config.twitter_user_id {
             Some(id) => {
                 info!("Using configured user ID: {}", id);
@@ -157,13 +155,13 @@ async fn main() -> Result<()> {
             info!("Mention poll cron: {}", mention_cron);
 
             let client_mention = Arc::clone(&twitter_client);
-            let brain_clone = Arc::clone(&brain);
+            let brain_mention = Arc::clone(&brain);
             let mention_tracker_clone = Arc::clone(&mention_tracker);
             let user_id_clone = user_id.clone();
 
             let mention_job = Job::new_async(mention_cron.as_str(), move |_uuid, _lock| {
                 let client_inner = Arc::clone(&client_mention);
-                let brain_inner = Arc::clone(&brain_clone);
+                let brain_inner = Arc::clone(&brain_mention);
                 let tracker_inner = Arc::clone(&mention_tracker_clone);
                 let uid = user_id_clone.clone();
                 Box::pin(async move {
@@ -187,9 +185,8 @@ async fn main() -> Result<()> {
 
     // Post one immediately on startup
     info!("Posting initial tweet...");
-    post_tweet(&twitter_client, &config, &tracker).await?;
+    post_tweet(&twitter_client, &config, &tracker, &topic_queue, &brain).await?;
 
-    // Start scheduler
     scheduler.start().await?;
 
     info!("Bot is now running. Press Ctrl+C to stop.");
@@ -203,6 +200,8 @@ async fn post_tweet(
     client: &TwitterClient,
     config: &BotConfig,
     tracker: &Arc<Mutex<PostTracker>>,
+    topic_queue: &Arc<Mutex<TopicQueue>>,
+    brain: &AgentBrain,
 ) -> Result<()> {
     {
         let mut t = tracker.lock().await;
@@ -213,25 +212,29 @@ async fn post_tweet(
         info!("Post {}/{} for today", t.count, t.max_per_day);
     }
 
-    info!("Generating tweet...");
-    let tweet = TweetGenerator::create_tweet(config);
+    let topic = {
+        let mut queue = topic_queue.lock().await;
+        queue.next()
+    };
 
-    let validated_tweet = match ContentFilter::validate(tweet) {
+    info!("Generating tweet for topic: {:?}", topic);
+
+    let tweet = match TweetGenerator::create_tweet(&topic, &brain.beliefs) {
         Some(t) => t,
         None => {
-            error!("Tweet failed validation, skipping");
+            error!("Failed to compose tweet for topic {:?}", topic);
             return Ok(());
         }
     };
 
-    let preview = validated_tweet.chars().take(50).collect::<String>();
+    let preview = tweet.chars().take(60).collect::<String>();
     info!("Tweet preview: {}...", preview);
 
     const MAX_RETRIES: u32 = 3;
     let mut last_error = None;
 
     for attempt in 1..=MAX_RETRIES {
-        match client.post_tweet(&validated_tweet).await {
+        match client.post_tweet(&tweet).await {
             Ok(response) => {
                 info!("Tweet posted successfully! ID: {}", response.data.id);
                 return Ok(());
@@ -276,7 +279,6 @@ async fn check_and_reply_mentions(
 
     info!("Found {} new mention(s)", count);
 
-    // Update last seen ID
     if let Some(meta) = &mentions.meta {
         if let Some(newest) = &meta.newest_id {
             let mut tracker = mention_tracker.lock().await;
@@ -285,19 +287,16 @@ async fn check_and_reply_mentions(
         }
     }
 
-    // Process each mention (oldest first)
     for mention in mentions.data.iter().rev() {
         info!(
             "Processing mention {} from user {}: \"{}\"",
             mention.id, mention.author_id, mention.text
         );
 
-        // Generate response using ZeroicAI reasoning
         let response = generate_response(&mention.text, &brain.beliefs, &brain.engine);
 
         match response {
             Some(reply_text) => {
-                // Validate through content filter
                 let validated = match ContentFilter::validate(reply_text) {
                     Some(t) => t,
                     None => {
@@ -317,7 +316,6 @@ async fn check_and_reply_mentions(
                     }
                 }
 
-                // Rate limit: wait between replies
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
             }
             None => {
