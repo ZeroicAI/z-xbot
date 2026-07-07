@@ -149,119 +149,84 @@ impl TweetGenerator {
 
         match topic {
             TweetTopic::WhatIsZeroicAI => vec![
-                format!("{}\n\nzeroicai.xyz\n\n#ZeroicAI #Rust #Agents", l("what_is_zeroicai")),
-                format!("{}\n\n{}\n\n#ZeroicAI #Rust", l("what_is_zeroicai"), l("modular")),
+                format!("{}\n\nzeroicai.xyz", l("what_is_zeroicai")),
+                format!("{}\n\n{}", l("what_is_zeroicai"), l("modular")),
             ],
             TweetTopic::WhyRust => vec![
-                format!("{}\n\n#Rust #AI #Performance", l("why_rust")),
-                format!("{}\n\n{}\n\n#Rust #ZeroicAI", l("why_rust"), l("design")),
+                l("why_rust"),
+                format!("{}\n\n{}", l("why_rust"), l("design")),
             ],
             TweetTopic::BDI => vec![
-                format!("{}\n\n#AI #BDI #Agents", l("bdi")),
-                format!("Most AI systems react. BDI agents reason.\n\n{}\n\n#AI #BDI", l("bdi")),
+                l("bdi"),
+                format!("Most AI systems react. BDI agents reason.\n\n{}", l("bdi")),
             ],
             TweetTopic::Messaging => vec![
-                format!("{}\n\n#AI #Agents #FIPA", l("messaging")),
-                format!("{}\n\n{}\n\n#ZeroicAI", l("messaging"), l("performatives")),
+                l("messaging"),
+                format!("{}\n\n{}", l("messaging"), l("performatives")),
             ],
             TweetTopic::SwarmPattern => vec![
-                format!("{}\n\n#AI #Swarm #ZeroicAI", l("swarm")),
-                format!(
-                    "No central controller. Agents follow local rules. The swarm emerges.\n\n{}\n\n#ZeroicAI",
-                    l("swarm")
-                ),
+                l("swarm"),
+                format!("No central controller. Agents follow local rules. The swarm emerges.\n\n{}", l("swarm")),
             ],
             TweetTopic::MarketPattern => vec![
-                format!("{}\n\n#AI #Agents #ZeroicAI", l("market")),
-                format!("Let agents bid for resources.\n\n{}\n\n#ZeroicAI #Agents", l("market")),
+                l("market"),
+                format!("Let agents bid for resources.\n\n{}", l("market")),
             ],
             TweetTopic::CoalitionPattern => vec![
-                format!("{}\n\n#ZeroicAI #MultiAgent", l("coalition")),
-                format!(
-                    "Temporary alliances. Shared goals. Clean dissolve.\n\n{}\n\n#ZeroicAI",
-                    l("coalition")
-                ),
+                l("coalition"),
+                format!("Temporary alliances. Shared goals. Clean dissolve.\n\n{}", l("coalition")),
             ],
             TweetTopic::RuntimeSupervisor => vec![
-                format!("{}\n\n{}\n\n#ZeroicAI #Rust", l("runtime_crate"), l("supervisor")),
-                format!("Agents fail. Systems shouldn't.\n\n{}\n\n#ZeroicAI", l("supervisor")),
+                format!("{}\n\n{}", l("runtime_crate"), l("supervisor")),
+                format!("Agents fail. Systems shouldn't.\n\n{}", l("supervisor")),
             ],
             TweetTopic::CircuitBreaker => vec![
-                format!("{}\n\n#ZeroicAI #Reliability #Rust", l("circuit_breaker")),
-                format!(
-                    "Cascading failures kill distributed systems.\n\n{}\n\n#ZeroicAI",
-                    l("circuit_breaker")
-                ),
+                l("circuit_breaker"),
+                format!("Cascading failures kill distributed systems.\n\n{}", l("circuit_breaker")),
             ],
             TweetTopic::OrgPatterns => vec![
-                format!("{}\n\n#ZeroicAI #MultiAgent #Rust", l("patterns")),
-                format!(
-                    "8 ways to organize agents. One framework.\n\n{}\n\n#ZeroicAI",
-                    l("patterns")
-                ),
+                l("patterns"),
+                format!("8 ways to organize agents. One framework.\n\n{}", l("patterns")),
             ],
             TweetTopic::CrateOverview => vec![
-                format!("{}\n\n#ZeroicAI #Rust #OpenSource", l("crates")),
-                format!("{}\n\n{}\n\n#ZeroicAI #Rust", l("crates"), l("modular")),
+                l("crates"),
+                format!("{}\n\n{}", l("crates"), l("modular")),
             ],
             TweetTopic::Solana => vec![
-                format!("{}\n\n#ZeroicAI #Solana #AI", l("solana")),
-                format!("{}\n\n#Solana #DeFi #Agents", l("solana_usecase")),
+                l("solana"),
+                l("solana_usecase"),
             ],
             TweetTopic::DeFiAgents => vec![
-                format!("{}\n\n#DeFi #AI #Solana", l("defi_agents")),
-                format!(
-                    "Autonomous DeFi. No human approval needed.\n\n{}\n\n#Solana #ZeroicAI",
-                    l("defi_agents")
-                ),
+                l("defi_agents"),
+                format!("Autonomous DeFi. No human approval needed.\n\n{}", l("defi_agents")),
             ],
             TweetTopic::GettingStarted => vec![
-                format!("{}\n\n{}\n\n#ZeroicAI #Rust", l("install"), l("docs")),
-                format!(
-                    "Ready to build agents?\n\n{}\n\n{}\n\n#ZeroicAI",
-                    l("install"),
-                    l("examples")
-                ),
+                format!("{}\n\n{}", l("install"), l("docs")),
+                format!("Ready to build agents?\n\n{}\n\n{}", l("install"), l("examples")),
             ],
             TweetTopic::OpenSource => vec![
-                format!("{}\n\nzeroicai.xyz\n\n#OpenSource #Rust #ZeroicAI", l("license")),
-                format!(
-                    "Open source. Production ready. No lock-in.\n\n{}\n\n#ZeroicAI",
-                    l("license")
-                ),
+                format!("{}\n\nzeroicai.xyz", l("license")),
+                format!("Open source. Production ready. No lock-in.\n\n{}", l("license")),
             ],
             TweetTopic::Community => vec![
-                format!("{}\n\n#ZeroicAI #AI #Community", l("telegram")),
-                format!(
-                    "Building the agent economy together.\n\n{}\n\n#ZeroicAI",
-                    l("telegram")
-                ),
+                l("telegram"),
+                format!("Building the agent economy together.\n\n{}", l("telegram")),
             ],
             TweetTopic::AgentVsScript => vec![
-                "An agent that can't recover from failure isn't an agent. It's a script with ambition.\n\n#AI #Agents #Engineering".to_string(),
-                "Single agents are toys. Multi-agent systems are infrastructure. The difference is coordination.\n\n#AI #MultiAgent #ZeroicAI".to_string(),
+                "An agent that can't recover from failure isn't an agent. It's a script with ambition.".to_string(),
+                "Single agents are toys. Multi-agent systems are infrastructure. The difference is coordination.".to_string(),
             ],
             TweetTopic::MultiAgentShift => vec![
-                "The shift from LLM wrappers to true agent systems is the most underrated transition in AI right now.\n\n#AI #Agents #ZeroicAI".to_string(),
-                "Going from one model to a coordinated agent team is like going from single-player to MMO. We're going multiplayer.\n\n#AI #Agents".to_string(),
+                "The shift from LLM wrappers to true agent systems is the most underrated transition in AI right now.".to_string(),
+                "Going from one model to a coordinated agent team is like going from single-player to MMO. We're going multiplayer.".to_string(),
             ],
             TweetTopic::FaultTolerance => vec![
-                format!(
-                    "{}\n\n{}\n\n#ZeroicAI #Reliability",
-                    l("circuit_breaker"),
-                    l("backoff")
-                ),
-                format!(
-                    "Self-healing is not a feature. It's a requirement.\n\n{}\n\n#ZeroicAI #Rust",
-                    l("supervisor")
-                ),
+                format!("{}\n\n{}", l("circuit_breaker"), l("backoff")),
+                format!("Self-healing is not a feature. It's a requirement.\n\n{}", l("supervisor")),
             ],
             TweetTopic::FipaStandard => vec![
-                format!("{}\n\n#FIPA #AI #Agents #ZeroicAI", l("fipa")),
-                format!(
-                    "ZeroicAI implements FIPA — the IEEE standard for agent communication.\n\n{}\n\n#ZeroicAI",
-                    l("fipa")
-                ),
+                l("fipa"),
+                format!("ZeroicAI implements FIPA — the IEEE standard for agent communication.\n\n{}", l("fipa")),
             ],
         }
     }
