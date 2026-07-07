@@ -327,7 +327,11 @@ pub fn generate_response(
     if facts.is_empty() {
         info!("No facts extracted from mention, using default response");
         let candidates = get_response_candidates("unknown", beliefs);
-        return select_best_response(candidates).map(truncate_to_tweet);
+        return select_best_response(candidates).map(truncate_to_tweet).map(|body| {
+            let signature = "\n\n↳ Agent RESPONDER";
+            let with_sig = format!("{}{}", body, signature);
+            if with_sig.len() <= 280 { with_sig } else { body }
+        });
     }
 
     info!("Extracted facts: {:?}", facts);
@@ -354,7 +358,11 @@ pub fn generate_response(
     };
 
     let candidates = get_response_candidates(&topic, beliefs);
-    select_best_response(candidates).map(truncate_to_tweet)
+    select_best_response(candidates).map(truncate_to_tweet).map(|body| {
+        let signature = "\n\n↳ Agent RESPONDER";
+        let with_sig = format!("{}{}", body, signature);
+        if with_sig.len() <= 280 { with_sig } else { body }
+    })
 }
 
 #[cfg(test)]
