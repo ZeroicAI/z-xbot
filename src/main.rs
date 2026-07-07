@@ -5,6 +5,8 @@ mod twitter;
 mod knowledge;
 mod responder;
 mod llm;
+mod debate;
+mod scout;
 
 use anyhow::Result;
 use dotenv::dotenv;
@@ -18,6 +20,8 @@ use z_cognition::{BeliefBase, Belief, ReasoningEngine};
 
 use generators::{TweetGenerator, TopicQueue, TweetTopic};
 use llm::LlmClient;
+use debate::{DebateQueue, generate_debate};
+use scout::fetch_trending_topic;
 use filters::ContentFilter;
 use config::BotConfig;
 use twitter::TwitterClient;
@@ -115,6 +119,7 @@ async fn main() -> Result<()> {
     let tracker = Arc::new(Mutex::new(PostTracker::new(config.max_posts_per_day)));
     let mention_tracker = Arc::new(Mutex::new(MentionTracker::new()));
     let topic_queue = Arc::new(Mutex::new(TopicQueue::new()));
+    let debate_queue = Arc::new(Mutex::new(DebateQueue::new()));
 
     let scheduler = JobScheduler::new().await?;
 
@@ -198,12 +203,83 @@ async fn main() -> Result<()> {
         }
     }
 
+    // --- Debate thread job (daily at 14:00 UTC) ---
+    if brain.llm.is_some() {
+        let client_debate = Arc::clone(&twitter_client);
+        let brain_debate = Arc::clone(&brain);
+        let debate_queue_clone = Arc::clone(&debate_queue);
+
+        let debate_job = Job::new_async("0 0 3,9,15,21 * * *", move |_uuid, _lock| {
+            let client_inner = Arc::clone(&client_debate);
+            let brain_inner = Arc::clone(&brain_debate);
+            let queue_inner = Arc::clone(&debate_queue_clone);
+            Box::pin(async move {
+                if let Err(e) = post_debate_thread(&client_inner, &brain_inner, &queue_inner).await {
+                    error!("Debate thread failed: {}", e);
+                }
+            })
+        })?;
+
+        scheduler.add(debate_job).await?;
+        info!("Debate thread job scheduled (4x daily at 03:00, 09:00, 15:00, 21:00 UTC)");
+    } else {
+        info!("Debate threads disabled — ANTHROPIC_API_KEY required");
+    }
+
     scheduler.start().await?;
 
     info!("Bot is now running. Press Ctrl+C to stop.");
     tokio::signal::ctrl_c().await?;
     info!("Shutting down...");
 
+    Ok(())
+}
+
+async fn post_debate_thread(
+    client: &TwitterClient,
+    brain: &AgentBrain,
+    debate_queue: &Arc<Mutex<DebateQueue>>,
+) -> Result<()> {
+    let llm = match &brain.llm {
+        Some(l) => l,
+        None => return Ok(()),
+    };
+
+    // Try to get a trending topic from Hacker News first
+    let http = reqwest::Client::new();
+    let question = match fetch_trending_topic(&http).await {
+        Some(t) => {
+            info!("Debate topic from HN: \"{}\"", t);
+            t
+        }
+        None => {
+            let topic = {
+                let mut q = debate_queue.lock().await;
+                q.next()
+            };
+            let q = topic.question().to_string();
+            info!("Debate topic from queue: \"{}\"", q);
+            q
+        }
+    };
+
+    let thread = generate_debate(&question, llm).await?;
+
+    // Post opener as first tweet
+    let first = client.post_tweet(&thread.opener).await?;
+    info!("Debate opener posted: {}", first.data.id);
+
+    let mut last_id = first.data.id;
+
+    // Post each agent's turn as a reply to the previous
+    for turn in &thread.turns {
+        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+        let reply = client.reply_to_tweet(&last_id, turn).await?;
+        info!("Debate turn posted: {}", reply.data.id);
+        last_id = reply.data.id;
+    }
+
+    info!("Debate thread complete ({} tweets)", 1 + thread.turns.len());
     Ok(())
 }
 
