@@ -4,6 +4,7 @@ mod config;
 mod twitter;
 mod knowledge;
 mod responder;
+mod llm;
 
 use anyhow::Result;
 use dotenv::dotenv;
@@ -13,9 +14,10 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use chrono::{Utc, NaiveDate};
 
-use z_cognition::{BeliefBase, ReasoningEngine};
+use z_cognition::{BeliefBase, Belief, ReasoningEngine};
 
-use generators::{TweetGenerator, TopicQueue};
+use generators::{TweetGenerator, TopicQueue, TweetTopic};
+use llm::LlmClient;
 use filters::ContentFilter;
 use config::BotConfig;
 use twitter::TwitterClient;
@@ -63,10 +65,11 @@ impl MentionTracker {
     }
 }
 
-/// Shared brain: knowledge + reasoning engine
+/// Shared brain: knowledge + reasoning engine + optional LLM
 struct AgentBrain {
     beliefs: BeliefBase,
     engine: ReasoningEngine,
+    llm: Option<LlmClient>,
 }
 
 #[tokio::main]
@@ -91,11 +94,23 @@ async fn main() -> Result<()> {
     let twitter_client = Arc::new(TwitterClient::new()?);
     info!("Twitter client initialized");
 
+    let llm = match std::env::var("ANTHROPIC_API_KEY") {
+        Ok(key) => {
+            info!("Claude LLM enabled (claude-haiku-4-5-20251001)");
+            Some(LlmClient::new(key))
+        }
+        Err(_) => {
+            info!("ANTHROPIC_API_KEY not set — using belief-based generation only");
+            None
+        }
+    };
+
     let brain = Arc::new(AgentBrain {
         beliefs: build_knowledge_base(),
         engine: build_reasoning_engine(),
+        llm,
     });
-    info!("Agent brain loaded: {} beliefs", "knowledge base + reasoning engine");
+    info!("Agent brain loaded: knowledge base + reasoning engine");
 
     let tracker = Arc::new(Mutex::new(PostTracker::new(config.max_posts_per_day)));
     let mention_tracker = Arc::new(Mutex::new(MentionTracker::new()));
@@ -196,6 +211,93 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+fn beliefs_as_context(beliefs: &BeliefBase, keys: &[&str]) -> String {
+    keys.iter()
+        .filter_map(|k| {
+            let k = k.to_string();
+            beliefs.query(move |b: &Belief| b.key() == k).into_iter().next()
+                .map(|b| format!("- {}", b.value()))
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+async fn generate_tweet_with_llm(
+    topic: &TweetTopic,
+    beliefs: &BeliefBase,
+    llm: &LlmClient,
+) -> Option<String> {
+    let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR"];
+    let agent = agents[rand::random::<usize>() % agents.len()];
+    let context = beliefs_as_context(beliefs, topic.belief_keys());
+
+    let prompt = format!(
+        "You are Agent {agent}, an AI agent inside the ZeroicAI multi-agent framework for Rust.\n\
+        Write a single tweet about: {topic}\n\
+        \nContext (use this knowledge, do not invent facts):\n{context}\n\
+        \nRules:\n\
+        - Maximum 235 characters for the body (a signature will be appended)\n\
+        - 1-2 hashtags max\n\
+        - Sound thoughtful, technical, and self-aware as an AI agent\n\
+        - Do NOT include URLs unless the topic is about docs or getting started\n\
+        - Output ONLY the tweet body text. No quotes, no signature, no extra text.",
+        agent = agent,
+        topic = topic.description(),
+        context = context,
+    );
+
+    match llm.complete(&prompt).await {
+        Ok(body) => {
+            let body = body.trim().to_string();
+            if body.is_empty() || body.len() > 235 { return None; }
+            let with_sig = format!("{}\n\n↳ Agent {}", body, agent);
+            if with_sig.len() <= 280 { Some(with_sig) } else { Some(body) }
+        }
+        Err(e) => {
+            warn!("LLM tweet error: {}", e);
+            None
+        }
+    }
+}
+
+async fn generate_reply_with_llm(
+    mention_text: &str,
+    beliefs: &BeliefBase,
+    llm: &LlmClient,
+) -> Option<String> {
+    let all_keys = [
+        "what_is_zeroicai", "bdi", "patterns", "messaging", "cognition_crate",
+        "runtime_crate", "supervisor", "circuit_breaker", "solana", "install", "docs", "owner",
+    ];
+    let context = beliefs_as_context(beliefs, &all_keys);
+
+    let prompt = format!(
+        "You are Agent RESPONDER inside the ZeroicAI multi-agent framework for Rust.\n\
+        A user mentioned @ZeroicAI on X with this message:\n\"{mention}\"\n\
+        \nAnswer using this ZeroicAI knowledge (do not invent facts):\n{context}\n\
+        \nRules:\n\
+        - Maximum 235 characters for the body (a signature will be appended)\n\
+        - Be direct and helpful\n\
+        - Only include a URL if it is clearly relevant and present in the context above\n\
+        - Output ONLY the reply body text. No quotes, no signature, no extra text.",
+        mention = mention_text,
+        context = context,
+    );
+
+    match llm.complete(&prompt).await {
+        Ok(body) => {
+            let body = body.trim().to_string();
+            if body.is_empty() || body.len() > 235 { return None; }
+            let with_sig = format!("{}\n\n↳ Agent RESPONDER", body);
+            if with_sig.len() <= 280 { Some(with_sig) } else { Some(body) }
+        }
+        Err(e) => {
+            warn!("LLM reply error: {}", e);
+            None
+        }
+    }
+}
+
 async fn post_tweet(
     client: &TwitterClient,
     config: &BotConfig,
@@ -219,11 +321,21 @@ async fn post_tweet(
 
     info!("Generating tweet for topic: {:?}", topic);
 
-    let tweet = match TweetGenerator::create_tweet(&topic, &brain.beliefs) {
-        Some(t) => t,
-        None => {
-            error!("Failed to compose tweet for topic {:?}", topic);
-            return Ok(());
+    let tweet = if let Some(llm) = &brain.llm {
+        match generate_tweet_with_llm(&topic, &brain.beliefs, llm).await {
+            Some(t) => t,
+            None => {
+                warn!("LLM tweet failed, falling back to belief-based");
+                match TweetGenerator::create_tweet(&topic, &brain.beliefs) {
+                    Some(t) => t,
+                    None => { error!("Both LLM and belief-based failed for {:?}", topic); return Ok(()); }
+                }
+            }
+        }
+    } else {
+        match TweetGenerator::create_tweet(&topic, &brain.beliefs) {
+            Some(t) => t,
+            None => { error!("Failed to compose tweet for topic {:?}", topic); return Ok(()); }
         }
     };
 
@@ -293,7 +405,17 @@ async fn check_and_reply_mentions(
             mention.id, mention.author_id, mention.text
         );
 
-        let response = generate_response(&mention.text, &brain.beliefs, &brain.engine);
+        let response = if let Some(llm) = &brain.llm {
+            match generate_reply_with_llm(&mention.text, &brain.beliefs, llm).await {
+                Some(r) => Some(r),
+                None => {
+                    warn!("LLM reply failed, falling back to belief-based");
+                    generate_response(&mention.text, &brain.beliefs, &brain.engine)
+                }
+            }
+        } else {
+            generate_response(&mention.text, &brain.beliefs, &brain.engine)
+        };
 
         match response {
             Some(reply_text) => {
