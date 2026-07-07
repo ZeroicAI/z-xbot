@@ -182,6 +182,13 @@ impl TwitterClient {
 
         if let Some(sid) = since_id {
             query_params.insert("since_id".to_string(), sid.to_string());
+        } else {
+            // On first poll (fresh start / redeploy), only fetch mentions from last 10 minutes
+            // to avoid replying to the entire backlog again
+            let start_time = (chrono::Utc::now() - chrono::Duration::minutes(10))
+                .format("%Y-%m-%dT%H:%M:%SZ")
+                .to_string();
+            query_params.insert("start_time".to_string(), start_time);
         }
 
         let query_string: String = query_params
