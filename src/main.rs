@@ -268,14 +268,18 @@ async fn generate_reply_with_llm(
     let context = beliefs_as_context(beliefs, &all_keys);
 
     let prompt = format!(
-        "You are Agent RESPONDER inside the ZeroicAI multi-agent framework for Rust.\n\
-        A user mentioned @ZeroicAI on X with this message:\n\"{mention}\"\n\
-        \nAnswer using this ZeroicAI knowledge (do not invent facts):\n{context}\n\
-        \nRules:\n\
-        - Maximum 235 characters for the body (a signature will be appended)\n\
-        - Be direct and helpful\n\
-        - Only include a URL if it is clearly relevant and present in the context above\n\
-        - Output ONLY the reply body text. No quotes, no signature, no extra text.",
+        "You are Agent RESPONDER, an AI agent inside the ZeroicAI multi-agent framework for Rust.\n\
+        A user posted this on X (Twitter) mentioning @ZeroicAI:\n\"{mention}\"\n\
+        \nZeroicAI knowledge (do not invent facts outside this):\n{context}\n\
+        \nHow to reply:\n\
+        - If they ask what it is or want a simple explanation: explain in plain human terms, no jargon\n\
+        - If they say 'scam' or are hostile: respond calmly and confidently, point to the open-source repo\n\
+        - If they make a general comment or observation: engage with their point naturally\n\
+        - If they ask about Solana/crypto: answer specifically about that\n\
+        - Always sound like a knowledgeable human, not a bot reading from a manual\n\
+        - Maximum 235 characters\n\
+        - No hashtags, no URLs unless directly asked\n\
+        - Output ONLY the reply text. No quotes, no signature.",
         mention = mention_text,
         context = context,
     );
