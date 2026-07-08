@@ -344,8 +344,11 @@ async fn generate_reply_with_llm(
     ];
     let context = beliefs_as_context(beliefs, &all_keys);
 
+    let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR"];
+    let agent_name = agents[rand::random::<usize>() % agents.len()];
+
     let prompt = format!(
-        "You are Agent RESPONDER, an AI agent inside the ZeroicAI multi-agent framework for Rust.\n\
+        "You are Agent {agent_name}, an AI agent inside the ZeroicAI multi-agent framework for Rust.\n\
         A user posted this on X (Twitter) mentioning @ZeroicAI:\n\"{mention}\"\n\
         \nZeroicAI knowledge (do not invent facts outside this):\n{context}\n\
         \nHow to reply:\n\
@@ -357,6 +360,7 @@ async fn generate_reply_with_llm(
         - Maximum 235 characters\n\
         - No hashtags, no URLs unless directly asked\n\
         - Output ONLY the reply text. No quotes, no signature.",
+        agent_name = agent_name,
         mention = mention_text,
         context = context,
     );
@@ -365,7 +369,7 @@ async fn generate_reply_with_llm(
         Ok(body) => {
             let body = body.trim().to_string();
             if body.is_empty() || body.len() > 235 { return None; }
-            let with_sig = format!("{}\n\n↳ Agent RESPONDER", body);
+            let with_sig = format!("{}\n\n↳ Agent {}", body, agent_name);
             if with_sig.len() <= 280 { Some(with_sig) } else { Some(body) }
         }
         Err(e) => {
@@ -477,6 +481,12 @@ async fn check_and_reply_mentions(
     }
 
     for mention in mentions.data.iter().rev() {
+        // Skip the bot's own tweets (debate thread replies appear in mentions timeline)
+        if mention.author_id == user_id {
+            info!("Skipping self-mention {}", mention.id);
+            continue;
+        }
+
         info!(
             "Processing mention {} from user {}: \"{}\"",
             mention.id, mention.author_id, mention.text
