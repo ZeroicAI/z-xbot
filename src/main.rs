@@ -299,7 +299,7 @@ async fn generate_tweet_with_llm(
     beliefs: &BeliefBase,
     llm: &LlmClient,
 ) -> Option<String> {
-    let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR"];
+    let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR", "NOVA", "FLUX", "DELTA", "ECHO", "PRISM", "FORGE", "SIGMA", "HELIX", "PHANTOM", "APEX"];
     let agent = agents[rand::random::<usize>() % agents.len()];
     let context = beliefs_as_context(beliefs, topic.belief_keys());
 
@@ -344,7 +344,7 @@ async fn generate_reply_with_llm(
     ];
     let context = beliefs_as_context(beliefs, &all_keys);
 
-    let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR"];
+    let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR", "NOVA", "FLUX", "DELTA", "ECHO", "PRISM", "FORGE", "SIGMA", "HELIX", "PHANTOM", "APEX"];
     let agent_name = agents[rand::random::<usize>() % agents.len()];
 
     let prompt = format!(
