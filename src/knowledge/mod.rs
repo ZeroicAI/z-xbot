@@ -12,7 +12,7 @@ pub fn build_knowledge_base() -> BeliefBase {
     beliefs.add(Belief::new("website", "Learn more at https://zeroicai.xyz"));
     beliefs.add(Belief::new("telegram", "Join the ZeroicAI community on Telegram: https://t.me/ZeroicAI"));
     beliefs.add(Belief::new("twitter", "Follow ZeroicAI on X: https://x.com/ZeroicAI"));
-    beliefs.add(Belief::new("owner", "ZeroicAI was created by Daniel, a full-stack developer based in the USA. He designed the framework architecture from the ground up, built all five core crates in Rust, and is leading the project toward a stable 1.0 release. You can find him on GitHub at github.com/pycogram and follow the project at github.com/ZeroicAI."));
+    beliefs.add(Belief::new("owner", "ZeroicAI was created by Daniel, a full-stack developer based in the USA. He designed the framework architecture from the ground up, built all five core crates in Rust, and is leading the project toward a stable 1.0 release. Find him on GitHub and X/Twitter at @pycogram, and follow the project at github.com/ZeroicAI."));
 
     // Crate structure
     beliefs.add(Belief::new("crates", "ZeroicAI has 5 core crates: z-core, z-messaging, z-cognition, z-patterns, and z-runtime."));
