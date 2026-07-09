@@ -1,5 +1,6 @@
 use z_cognition::{BeliefBase, ReasoningEngine, Rule, UtilityFunction};
 use tracing::{info, debug};
+use rand;
 
 /// Build the reasoning engine with topic-matching rules
 pub fn build_reasoning_engine() -> ReasoningEngine {
@@ -140,7 +141,26 @@ pub fn build_reasoning_engine() -> ReasoningEngine {
             .with_conclusion("topic:solana"),
     );
 
-    // Token
+    // Tokenomics (staking, governance, value accrual — more specific than generic token)
+    engine.add_rule(
+        Rule::new("topic:tokenomics")
+            .with_condition("staking")
+            .with_condition("stake")
+            .with_condition("governance")
+            .with_condition("dao")
+            .with_condition("tokenomics")
+            .with_condition("fee")
+            .with_condition("burn")
+            .with_condition("holder")
+            .with_condition("holders")
+            .with_condition("value")
+            .with_condition("benefit")
+            .with_condition("revenue")
+            .with_condition("sharing")
+            .with_conclusion("topic:tokenomics"),
+    );
+
+    // Token (CA, ticker, buy)
     engine.add_rule(
         Rule::new("topic:token")
             .with_condition("token")
@@ -241,6 +261,10 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
         "topic:examples" => vec![
             lookup(beliefs, "examples"),
             format!("{}\n\nCovers all 5 crates end-to-end.", lookup(beliefs, "examples")),
+        ],
+        "topic:tokenomics" => vec![
+            lookup(beliefs, "token_tokenomics"),
+            format!("{}\n\nCA: yi66MMYBeHvMAbiboJeqVcjXh3b746D3P6nCRfypump", lookup(beliefs, "token_tokenomics")),
         ],
         "topic:token" => vec![
             lookup(beliefs, "token"),
@@ -346,8 +370,9 @@ pub fn generate_response(
         info!("No facts extracted from mention, using default response");
         let candidates = get_response_candidates("unknown", beliefs);
         return select_best_response(candidates).map(truncate_to_tweet).map(|body| {
-            let signature = "\n\n↳ Agent RESPONDER";
-            let with_sig = format!("{}{}", body, signature);
+            let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR", "NOVA", "FLUX", "DELTA", "ECHO", "PRISM", "FORGE", "SIGMA", "HELIX", "PHANTOM", "APEX"];
+            let name = agents[rand::random::<usize>() % agents.len()];
+            let with_sig = format!("{}\n\n↳ Agent {}", body, name);
             if with_sig.len() <= 280 { with_sig } else { body }
         });
     }
@@ -377,8 +402,9 @@ pub fn generate_response(
 
     let candidates = get_response_candidates(&topic, beliefs);
     select_best_response(candidates).map(truncate_to_tweet).map(|body| {
-        let signature = "\n\n↳ Agent RESPONDER";
-        let with_sig = format!("{}{}", body, signature);
+        let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR", "NOVA", "FLUX", "DELTA", "ECHO", "PRISM", "FORGE", "SIGMA", "HELIX", "PHANTOM", "APEX"];
+        let name = agents[rand::random::<usize>() % agents.len()];
+        let with_sig = format!("{}\n\n↳ Agent {}", body, name);
         if with_sig.len() <= 280 { with_sig } else { body }
     })
 }

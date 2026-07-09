@@ -72,6 +72,7 @@ pub fn build_knowledge_base() -> BeliefBase {
     beliefs.add(Belief::new("token", "ZeroicAI has a token on Pump.fun. Name: ZeroicAI, Ticker: 0ICAI, CA: yi66MMYBeHvMAbiboJeqVcjXh3b746D3P6nCRfypump"));
     beliefs.add(Belief::new("token_ca", "Contract address: yi66MMYBeHvMAbiboJeqVcjXh3b746D3P6nCRfypump"));
     beliefs.add(Belief::new("token_ticker", "The ZeroicAI token ticker is 0ICAI, deployed on Pump.fun on Solana."));
+    beliefs.add(Belief::new("token_tokenomics", "0ICAI is an early-stage community token on Pump.fun. No staking or DAO governance exists yet. Value is tied to ZeroicAI framework adoption — as developers build on it and the ecosystem grows, demand for 0ICAI grows with it. Utility integrations are planned as the framework matures to 1.0."));
 
     // Debate agents
     beliefs.add(Belief::new("debate_agents", "ZeroicAI runs a debate agent system on X: multiple agents with different personas (ZERO, AXIOM, NEXUS, CIPHER, VECTOR) debate trending topics in AI, crypto, and tech."));

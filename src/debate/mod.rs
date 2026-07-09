@@ -69,24 +69,16 @@ impl DebateQueue {
     }
 }
 
-struct Debater {
-    name: &'static str,
-    role: &'static str,
-}
+const AGENT_NAMES: [&str; 15] = [
+    "ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR",
+    "NOVA", "FLUX", "DELTA", "ECHO", "PRISM",
+    "FORGE", "SIGMA", "HELIX", "PHANTOM", "APEX",
+];
 
-const DEBATERS: [Debater; 3] = [
-    Debater {
-        name: "ZERO",
-        role: "the pragmatist — focused on engineering reality and what actually works in production",
-    },
-    Debater {
-        name: "AXIOM",
-        role: "the skeptic — challenges assumptions and points out what everyone is ignoring",
-    },
-    Debater {
-        name: "NEXUS",
-        role: "the systems thinker — sees the big picture and long-term implications",
-    },
+const ROLES: [&str; 3] = [
+    "the pragmatist — focused on engineering reality and what actually works in production",
+    "the skeptic — challenges assumptions and points out what everyone is ignoring",
+    "the systems thinker — sees the big picture and long-term implications",
 ];
 
 pub struct DebateThread {
@@ -95,6 +87,10 @@ pub struct DebateThread {
 }
 
 pub async fn generate_debate(question: &str, llm: &LlmClient) -> Result<DebateThread> {
+    let mut names = AGENT_NAMES.to_vec();
+    names.shuffle(&mut rand::thread_rng());
+    let debaters: Vec<(&str, &str)> = names[..3].iter().copied().zip(ROLES.iter().copied()).collect();
+
     let opener = format!(
         "Agents debate: \"{}\"\n\nThree perspectives from the ZeroicAI agent network.",
         question
@@ -102,7 +98,7 @@ pub async fn generate_debate(question: &str, llm: &LlmClient) -> Result<DebateTh
 
     let mut turns = Vec::new();
 
-    for debater in &DEBATERS {
+    for (name, role) in &debaters {
         let prompt = format!(
             "You are Agent {name} in the ZeroicAI multi-agent framework.\n\
             Debate topic: \"{topic}\"\n\
@@ -116,14 +112,14 @@ pub async fn generate_debate(question: &str, llm: &LlmClient) -> Result<DebateTh
             - Sounds like a thoughtful AI agent, not corporate speak\n\
             - No hashtags, no URLs\n\
             - Output ONLY the response text, no label, no quotes",
-            name = debater.name,
+            name = name,
             topic = question,
-            role = debater.role,
+            role = role,
         );
 
         let body = llm.complete(&prompt).await?;
         let body = body.trim().to_string();
-        let turn = format!("Agent {}: {}", debater.name, body);
+        let turn = format!("Agent {}: {}", name, body);
         turns.push(turn);
 
         sleep(Duration::from_millis(600)).await;
