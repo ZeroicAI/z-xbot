@@ -133,7 +133,7 @@ async fn main() -> Result<()> {
     let queue_clone = Arc::clone(&topic_queue);
     let brain_clone = Arc::clone(&brain);
 
-    let tweet_job = Job::new_async(cron_expr.as_str(), move |_uuid, _lock| {
+    let tweet_job = Job::new_async("0 0 0,3,6,9,15,18,21 * * *", move |_uuid, _lock| {
         let config_inner = config_clone.clone();
         let client_inner = Arc::clone(&client_clone);
         let tracker_inner = Arc::clone(&tracker_clone);
@@ -209,7 +209,7 @@ async fn main() -> Result<()> {
         let brain_debate = Arc::clone(&brain);
         let debate_queue_clone = Arc::clone(&debate_queue);
 
-        let debate_job = Job::new_async("0 0 3,9,15,21 * * *", move |_uuid, _lock| {
+        let debate_job = Job::new_async("0 0 12 * * *", move |_uuid, _lock| {
             let client_inner = Arc::clone(&client_debate);
             let brain_inner = Arc::clone(&brain_debate);
             let queue_inner = Arc::clone(&debate_queue_clone);
@@ -221,7 +221,7 @@ async fn main() -> Result<()> {
         })?;
 
         scheduler.add(debate_job).await?;
-        info!("Debate thread job scheduled (4x daily at 03:00, 09:00, 15:00, 21:00 UTC)");
+        info!("Debate thread job scheduled (daily at 12:00 UTC)");
     } else {
         info!("Debate threads disabled — ANTHROPIC_API_KEY required");
     }
