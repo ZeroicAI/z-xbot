@@ -341,8 +341,8 @@ async fn generate_reply_with_llm(
 ) -> Option<String> {
     let all_keys = [
         "what_is_zeroicai", "bdi", "patterns", "messaging", "cognition_crate",
-        "runtime_crate", "supervisor", "circuit_breaker", "solana", "install", "docs", "owner",
-        "token", "token_ca", "token_ticker", "token_tokenomics",
+        "runtime_crate", "supervisor", "circuit_breaker", "sandbox", "solana", "install", "docs",
+        "owner", "token", "token_ca", "token_ticker", "token_tokenomics", "why_rust",
     ];
     let context = beliefs_as_context(beliefs, &all_keys);
 
@@ -375,7 +375,7 @@ async fn generate_reply_with_llm(
         - If they make a general comment or observation: engage with their point naturally\n\
         - If they ask about Solana/crypto/token: answer specifically about that\n\
         - Always sound like a knowledgeable human, not a bot reading from a manual\n\
-        - Maximum 235 characters\n\
+        - Target 200-220 characters max — be concise but complete\n\
         - No hashtags, no URLs unless directly asked\n\
         - Output ONLY the reply text. No quotes, no signature.",
         agent_name = agent_name,
@@ -390,9 +390,19 @@ async fn generate_reply_with_llm(
     };
 
     match result {
-        Ok(body) => {
-            let body = body.trim().to_string();
-            if body.is_empty() || body.len() > 235 { return None; }
+        Ok(raw) => {
+            let raw = raw.trim().to_string();
+            if raw.is_empty() { return None; }
+            // Truncate at last sentence boundary if over limit rather than rejecting outright
+            let body = if raw.len() > 240 {
+                if let Some(pos) = raw[..237].rfind(". ") {
+                    raw[..pos + 1].to_string()
+                } else {
+                    format!("{}...", &raw[..237])
+                }
+            } else {
+                raw
+            };
             let with_sig = format!("{}\n\n↳ Agent {}", body, agent_name);
             if with_sig.len() <= 280 { Some(with_sig) } else { Some(body) }
         }
