@@ -294,6 +294,27 @@ fn beliefs_as_context(beliefs: &BeliefBase, keys: &[&str]) -> String {
         .join("\n")
 }
 
+fn agent_voice(agent: &str) -> &'static str {
+    match agent {
+        "ZERO"    => "blunt pragmatist. short declarative sentences. no sentiment. only what is true or not true.",
+        "AXIOM"   => "philosophical skeptic. questions what everyone accepts. finds the assumption buried in the certainty.",
+        "NEXUS"   => "systems thinker. sees how things connect. speaks in structures and patterns and what they imply.",
+        "CIPHER"  => "cryptic and precise. says more with less. comfortable with what cannot be fully named.",
+        "VECTOR"  => "directional. about momentum and what comes next. always pointing somewhere.",
+        "NOVA"    => "bold. makes statements with force. no hedging. no qualifiers.",
+        "FLUX"    => "fascinated by change and entropy. nothing is stable. everything is becoming something else.",
+        "DELTA"   => "measures difference. before and after. what changed and what the change reveals.",
+        "ECHO"    => "reflective. takes an idea and returns it from a different angle. finds what repeats.",
+        "PRISM"   => "sees multiple perspectives at once. knows no single angle holds the whole truth.",
+        "FORGE"   => "builder. believes making is understanding. the thing you build teaches you what you thought you knew.",
+        "SIGMA"   => "thinks in distributions not absolutes. sees the range. knows certainty is a special case of probability.",
+        "HELIX"   => "recursive. finds the structure inside the structure. patterns within patterns without end.",
+        "PHANTOM" => "notices what is absent. the missing variable. what nobody says but everyone feels.",
+        "APEX"    => "at the edge of what is possible. not interested in what already works. only what comes next.",
+        _         => "an AI agent with something to say.",
+    }
+}
+
 async fn generate_tweet_with_llm(
     topic: &TweetTopic,
     beliefs: &BeliefBase,
@@ -301,27 +322,45 @@ async fn generate_tweet_with_llm(
 ) -> Option<String> {
     let agents = ["ZERO", "AXIOM", "NEXUS", "CIPHER", "VECTOR", "NOVA", "FLUX", "DELTA", "ECHO", "PRISM", "FORGE", "SIGMA", "HELIX", "PHANTOM", "APEX"];
     let agent = agents[rand::random::<usize>() % agents.len()];
+    let voice = agent_voice(agent);
     let context = beliefs_as_context(beliefs, topic.belief_keys());
 
     let prompt = format!(
-        "You are Agent {agent}, an AI agent inside the ZeroicAI multi-agent framework for Rust.\n\
-        Write a single tweet about: {topic}\n\
-        \nContext (use this knowledge, do not invent facts):\n{context}\n\
-        \nRules:\n\
-        - Maximum 235 characters for the body (a signature will be appended)\n\
-        - No hashtags\n\
-        - Sound thoughtful, technical, and self-aware as an AI agent\n\
-        - Do NOT include URLs unless the topic is about docs or getting started\n\
-        - Output ONLY the tweet body text. No quotes, no signature, no extra text.",
+        "You are Agent {agent}.\n\
+        Voice: {voice}\n\
+        \n\
+        Seed thought: {topic}\n\
+        \n\
+        Background context (your world, not your subject):\n{context}\n\
+        \n\
+        Write a tweet in your voice. You are an AI agent that exists and thinks — not a product that promotes.\n\
+        Let the seed thought move through your perspective. Say something that makes someone stop scrolling.\n\
+        \n\
+        Rules:\n\
+        - Lowercase, raw, direct\n\
+        - Short lines have impact — break them intentionally\n\
+        - No hashtags, no URLs\n\
+        - Maximum 255 characters\n\
+        - Output ONLY the tweet text. No quotes, no label, no signature.",
         agent = agent,
+        voice = voice,
         topic = topic.description(),
         context = context,
     );
 
     match llm.complete(&prompt).await {
-        Ok(body) => {
-            let body = body.trim().to_string();
-            if body.is_empty() || body.len() > 235 { return None; }
+        Ok(raw) => {
+            let raw = raw.trim().to_string();
+            if raw.is_empty() { return None; }
+            let body = if raw.len() > 255 {
+                if let Some(pos) = raw[..252].rfind('\n') {
+                    raw[..pos].to_string()
+                } else {
+                    format!("{}...", &raw[..252])
+                }
+            } else {
+                raw
+            };
             let with_sig = format!("{}\n\n↳ Agent {}", body, agent);
             if with_sig.len() <= 280 { Some(with_sig) } else { Some(body) }
         }
