@@ -174,6 +174,24 @@ pub fn build_reasoning_engine() -> ReasoningEngine {
             .with_conclusion("topic:token"),
     );
 
+    // Security / sandboxing
+    engine.add_rule(
+        Rule::new("topic:security")
+            .with_condition("security")
+            .with_condition("secure")
+            .with_condition("ransomware")
+            .with_condition("attack")
+            .with_condition("threat")
+            .with_condition("sandbox")
+            .with_condition("sandboxing")
+            .with_condition("isolation")
+            .with_condition("permission")
+            .with_condition("protect")
+            .with_condition("protection")
+            .with_condition("safe")
+            .with_conclusion("topic:security"),
+    );
+
     // Owner / creator
     engine.add_rule(
         Rule::new("topic:owner")
@@ -261,6 +279,10 @@ fn get_response_candidates(topic: &str, beliefs: &BeliefBase) -> Vec<String> {
         "topic:examples" => vec![
             lookup(beliefs, "examples"),
             format!("{}\n\nCovers all 5 crates end-to-end.", lookup(beliefs, "examples")),
+        ],
+        "topic:security" => vec![
+            lookup(beliefs, "sandbox"),
+            format!("{}\n\n{}", lookup(beliefs, "sandbox"), lookup(beliefs, "circuit_breaker")),
         ],
         "topic:tokenomics" => vec![
             lookup(beliefs, "token_tokenomics"),
